@@ -1,7 +1,7 @@
 
 import { Link, NavLink } from "react-router-dom";
 import { Feather } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import UserNav from "./UserNav";
 
 const navLinks = [
   { to: "/", label: "Home" },
@@ -34,8 +34,7 @@ const Header = () => {
             ))}
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost">Log In</Button>
-            <Button className="bg-brand-indigo hover:bg-brand-indigo/90">Sign Up</Button>
+            <UserNav />
           </div>
         </div>
       </nav>
