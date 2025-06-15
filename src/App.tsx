@@ -10,7 +10,7 @@ import BrowsePoems from "./pages/BrowsePoems";
 import PoemDetail from "./pages/PoemDetail";
 import Contests from "./pages/Contests";
 import Layout from "./components/Layout";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider } from "@/context/AuthContext";
 import Auth from "./pages/Auth";
 import SubmitPoem from "./pages/SubmitPoem";
 import Profile from "./pages/Profile";
