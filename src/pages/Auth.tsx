@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,11 +9,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 
+// Helper function for password strength validation
+const passwordMeetsRequirements = (password: string) => {
+  // Enforce min 8 chars, one uppercase, one lowercase, one number
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/.test(password);
+};
+
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
+  const [signupError, setSignupError] = useState('');
   const navigate = useNavigate();
   const { session } = useAuth();
 
@@ -27,6 +33,7 @@ const Auth = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setSignupError('');
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       toast.error(error.message);
@@ -39,6 +46,13 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSignupError('');
+    if (!passwordMeetsRequirements(password)) {
+      setSignupError(
+        "Password must be at least 8 characters, include uppercase, lowercase, and a number."
+      );
+      return;
+    }
     setLoading(true);
     const { error } = await supabase.auth.signUp({
       email,
@@ -112,6 +126,12 @@ const Auth = () => {
                 <div className="space-y-2">
                   <Label htmlFor="password-signup">Password</Label>
                   <Input id="password-signup" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+                  <p className="text-xs text-muted-foreground">
+                    Password must be at least 8 characters, include uppercase, lowercase, and a number.
+                  </p>
+                  {signupError && (
+                    <p className="text-xs text-destructive">{signupError}</p>
+                  )}
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? 'Signing up...' : 'Sign Up'}
