@@ -28,7 +28,7 @@ import {
 
 const fetchPoem = async (id: string): Promise<PoemDetailData | null> => {
     const { data, error } = await supabase
-        .rpc('get_public_poem_details', { poem_id: id })
+        .rpc('get_public_poem_details', { p_poem_id: id })
         .single();
     if (error && error.code !== 'PGRST116') { // Ignore 'exact one row' error for not found
         throw new Error(error.message);
