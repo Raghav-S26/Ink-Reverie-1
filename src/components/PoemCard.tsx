@@ -18,7 +18,7 @@ const PoemCard = ({ poem }: PoemCardProps) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      whileHover={{ y: -5 }}
+      whileHover={{ y: -5, scale: 1.03 }}
     >
       <Card className="h-full flex flex-col overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 bg-card/60 backdrop-blur-sm">
         <CardHeader>

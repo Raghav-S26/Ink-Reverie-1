@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -58,7 +59,12 @@ const Index = () => {
       </motion.section>
 
       {/* Featured Poems */}
-      <section>
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-bold font-serif">Featured Poems</h2>
             <Link to="/poems" className="flex items-center gap-1 text-primary hover:underline">
@@ -74,10 +80,15 @@ const Index = () => {
             ))
           )}
         </div>
-      </section>
+      </motion.section>
 
       {/* Active Contests */}
-      <section>
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
         <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-bold font-serif">Active Contests</h2>
             <Link to="/contests" className="flex items-center gap-1 text-primary hover:underline">
@@ -93,7 +104,7 @@ const Index = () => {
             ))
           )}
         </div>
-      </section>
+      </motion.section>
     </div>
   );
 };

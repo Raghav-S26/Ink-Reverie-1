@@ -15,7 +15,7 @@ const ContestCard = ({ contest }: ContestCardProps) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      whileHover={{ y: -5 }}
+      whileHover={{ y: -5, scale: 1.03 }}
     >
       <Card className="overflow-hidden transition-shadow hover:shadow-xl bg-gradient-to-br from-primary/10 via-background to-accent/10">
         <CardHeader>
