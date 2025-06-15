@@ -20,64 +20,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(true);
-    
-    const getSessionAndProfile = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       const currentUser = session?.user ?? null;
       setUser(currentUser);
+      setProfile(null); // Reset profile on auth change
 
       if (currentUser) {
         try {
           const { data: profileData, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', currentUser.id)
+            .from("profiles")
+            .select("*")
+            .eq("id", currentUser.id)
             .single();
+
           if (error) {
-            console.error("Error fetching profile on initial load:", error);
-            setProfile(null);
+            console.error("Error fetching profile:", error.message);
           } else {
             setProfile(profileData);
           }
-        } catch (error) {
-          console.error("Error fetching profile on initial load (catch):", error);
-          setProfile(null);
+        } catch (e) {
+            console.error("Caught error fetching profile:", e);
         }
-      } else {
-        setProfile(null);
       }
       setLoading(false);
-    };
-
-    getSessionAndProfile();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      
-      if (currentUser) {
-        // Defer profile fetch to avoid deadlocks
-        setTimeout(() => {
-          supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', currentUser.id)
-            .single()
-            .then(({ data: profileData, error }) => {
-              if (error) {
-                console.error("Error fetching profile on auth change:", error);
-                setProfile(null);
-              } else {
-                setProfile(profileData);
-              }
-            });
-        }, 0);
-      } else {
-        setProfile(null);
-      }
     });
 
     return () => {
