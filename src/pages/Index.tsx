@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -42,10 +41,10 @@ const Index = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
       >
-        <h1 className="text-4xl md:text-6xl font-bold font-serif text-gray-800 tracking-tight">
+        <h1 className="text-4xl md:text-6xl font-bold font-serif text-foreground tracking-tight">
           Where Words Find Their Stage.
         </h1>
-        <p className="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-gray-600">
+        <p className="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground">
           Join a vibrant community of poets. Share your voice, enter contests, and discover your next inspiration.
         </p>
         <div className="mt-8 flex justify-center gap-4">

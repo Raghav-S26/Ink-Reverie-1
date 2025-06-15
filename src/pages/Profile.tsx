@@ -43,7 +43,7 @@ const ProfilePage = () => {
   if (isLoading || !user) {
     return (
       <div className="space-y-4">
-        <h1 className="text-3xl font-bold mb-6">Your Profile</h1>
+        <h1 className="text-3xl font-bold font-serif mb-6">Your Profile</h1>
         <div className="space-y-4">
             <Skeleton className="h-20 w-20 rounded-full" />
             <Skeleton className="h-10 w-full" />
@@ -76,7 +76,7 @@ const ProfilePage = () => {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">Your Profile</h1>
+      <h1 className="text-3xl font-bold font-serif mb-6">Your Profile</h1>
       {profile && <ProfileForm profile={profile} />}
     </div>
   );

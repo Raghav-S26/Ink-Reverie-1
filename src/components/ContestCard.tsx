@@ -24,13 +24,13 @@ const ContestCard = ({ contest }: ContestCardProps) => {
         </CardHeader>
         <CardContent className="space-y-2">
             {contest.end_date && (
-                <div className="flex items-center gap-2 text-gray-600">
+                <div className="flex items-center gap-2 text-muted-foreground">
                     <Calendar className="h-4 w-4 text-brand-indigo"/>
                     <span>Deadline: {new Date(contest.end_date).toLocaleDateString()}</span>
                 </div>
             )}
             {contest.prize && (
-                <div className="flex items-center gap-2 text-gray-600">
+                <div className="flex items-center gap-2 text-muted-foreground">
                     <Trophy className="h-4 w-4 text-brand-gold"/>
                     <span>Prize: {contest.prize}</span>
                 </div>
