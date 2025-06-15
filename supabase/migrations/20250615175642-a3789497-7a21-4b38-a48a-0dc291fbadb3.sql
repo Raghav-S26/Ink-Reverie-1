@@ -78,20 +78,3 @@ CREATE POLICY "Admins can update site settings"
 ON public.site_settings
 FOR UPDATE
 USING (public.get_user_role(auth.uid()) = 'admin');
-
-
--- 4. Security improvement: make 'poems.status' default to 'submitted' and never allow insert with 'approved' unless admin.
-
-ALTER TABLE public.poems ALTER COLUMN status SET DEFAULT 'submitted';
-
-DROP POLICY IF EXISTS "Allow authenticated users to insert poems" ON public.poems;
-CREATE POLICY "Allow authenticated users to insert poems"
-ON public.poems
-FOR INSERT
-WITH CHECK (
-  auth.uid() = user_id 
-  AND (status IS NULL OR status = 'submitted' OR (status = 'approved' AND public.get_user_role(auth.uid()) = 'admin'))
-);
-
--- 5. Optional (recommended): enforce stronger password complexity at the application level (must be handled in frontend/backend, Supabase doesn't enforce this at DB level).
-
