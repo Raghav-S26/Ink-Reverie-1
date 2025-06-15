@@ -1,4 +1,3 @@
-
 import { useParams, Link } from "react-router-dom";
 import NotFound from "./NotFound";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -10,6 +9,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PoemDetailData } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "@/components/ui/sonner";
+import CommentSection from "@/components/CommentSection";
+import { useAuth } from "@/context/AuthContext";
+import { useState } from "react";
 
 const fetchPoem = async (id: string): Promise<PoemDetailData | null> => {
     const { data, error } = await supabase
@@ -24,12 +27,48 @@ const fetchPoem = async (id: string): Promise<PoemDetailData | null> => {
 
 const PoemDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const { session } = useAuth();
 
-  const { data: poem, isLoading, isError } = useQuery({
+  const { data: poem, isLoading, isError, refetch } = useQuery({
     queryKey: ["poem", id],
     queryFn: () => fetchPoem(id!),
     enabled: !!id,
   });
+
+  const [likeLoading, setLikeLoading] = useState(false);
+  const [shareLoading, setShareLoading] = useState(false);
+
+  // Handle liking a poem
+  const handleLike = async () => {
+    if (!session) {
+      toast.error("You need to be logged in to like poems.");
+      return;
+    }
+    setLikeLoading(true);
+    const { error } = await supabase
+      .from("poems")
+      .update({ votes: (poem?.votes ?? 0) + 1 })
+      .eq("id", id!);
+    setLikeLoading(false);
+    if (error) {
+      toast.error("Failed to like poem: " + error.message);
+    } else {
+      toast.success("Liked! ❤️");
+      refetch();
+    }
+  };
+
+  // Handle sharing a poem (copy URL)
+  const handleShare = async () => {
+    setShareLoading(true);
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success("Link copied to clipboard!");
+    } catch {
+      toast.error("Failed to copy link.");
+    }
+    setShareLoading(false);
+  };
 
   if (isLoading) {
       return (
@@ -71,15 +110,32 @@ const PoemDetail = () => {
           </div>
         
           <div className="mt-12 pt-8 border-t flex flex-wrap items-center gap-4">
-            <Button variant="outline" className="flex items-center gap-2">
-              <Heart className="h-5 w-5 text-pink-500" /> Like ({votes})
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2" 
+              onClick={handleLike}
+              disabled={likeLoading}
+            >
+              <Heart className="h-5 w-5 text-pink-500" /> 
+              {likeLoading ? "Liking..." : <>Like ({votes})</>}
             </Button>
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2"
+              onClick={handleShare}
+              disabled={shareLoading}
+            >
+              <Share2 className="h-5 w-5 text-gray-500" /> 
+              {shareLoading ? "Sharing..." : "Share"}
+            </Button>
+            <Button variant="outline" className="flex items-center gap-2" disabled>
               <MessageSquare className="h-5 w-5 text-brand-indigo" /> Comment
             </Button>
-            <Button variant="outline" className="flex items-center gap-2">
-              <Share2 className="h-5 w-5 text-gray-500" /> Share
-            </Button>
+          </div>
+          {/* Comment Section */}
+          <div className="mt-12 border-t pt-8">
+            <h3 className="font-semibold text-xl mb-6">Comments</h3>
+            <CommentSection poemId={poem.id} />
           </div>
         </CardContent>
       </Card>
