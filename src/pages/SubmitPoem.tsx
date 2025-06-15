@@ -18,10 +18,19 @@ import {
   FormMessage,
   FormDescription,
 } from "@/components/ui/form";
+import { useEffect } from "react";
 
 const SubmitPoem = () => {
-  const { user, session } = useAuth();
+  const { user, session, profile } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!session) {
+      toast.info("Please log in to submit a poem.");
+      navigate("/auth");
+    }
+  }, [session, navigate]);
 
   const form = useForm<PoemFormValues>({
     resolver: zodResolver(PoemSchema),
@@ -35,48 +44,49 @@ const SubmitPoem = () => {
 
   const { isSubmitting } = form.formState;
 
-  // Redirect to login if not authenticated
-  if (!session) {
-    toast.info("Please log in to submit a poem.");
-    navigate("/auth");
-    return null;
-  }
-
   async function onSubmit(values: PoemFormValues) {
-    console.log("Attempting to submit poem with values:", values);
-    if (!user) {
-      toast.error("Authentication error. Please log in again.");
-      console.error("SubmitPoem Error: User object is missing despite an active session.");
+    console.log("Poem submission initiated. Form values:", values);
+    
+    if (!user || !profile) {
+      toast.error("Authentication error. You must be logged in to submit a poem.");
+      console.error("SubmitPoem Error: User or Profile object is missing despite an active session.");
       navigate("/auth");
       return;
     }
+    
+    console.log(`Submitting for user ID: ${user.id} with profile:`, profile);
 
     try {
-      const { error } = await supabase.from("poems").insert([
+      const { data, error } = await supabase.from("poems").insert([
         {
           title: values.title,
           content: values.content,
+          // Ensure empty string becomes null for the database
           category: values.category || null,
           user_id: user.id,
-          status: 'approved', // Auto-approval as defined in our RLS policies
+          // Status is auto-approved based on our RLS policy
+          status: 'approved',
         },
-      ]);
+      ]).select();
 
       if (error) {
-        throw error;
+        console.error("Supabase insert error object:", error);
+        throw new Error(error.message);
       }
 
+      console.log("Poem successfully inserted into Supabase:", data);
       toast.success("Your poem has been published successfully!");
       navigate("/poems");
 
     } catch (error: any) {
-      toast.error("Failed to submit poem. " + error.message);
-      console.error("Supabase insert error:", {
-        message: error.message,
-        details: error.details,
-        code: error.code,
-      });
+      toast.error("Failed to submit poem: " + error.message);
+      console.error("Full error during poem submission:", error);
     }
+  }
+  
+  if (!session) {
+    // Render nothing while redirecting
+    return null;
   }
 
   return (
