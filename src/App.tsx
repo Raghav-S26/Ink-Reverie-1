@@ -10,6 +10,8 @@ import BrowsePoems from "./pages/BrowsePoems";
 import PoemDetail from "./pages/PoemDetail";
 import Contests from "./pages/Contests";
 import Layout from "./components/Layout";
+import { AuthProvider } from "./context/AuthContext";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -18,18 +20,21 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" element={<Index />} />
-            <Route path="/poems" element={<BrowsePoems />} />
-            <Route path="/poems/:id" element={<PoemDetail />} />
-            <Route path="/contests" element={<Contests />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<Index />} />
+              <Route path="/poems" element={<BrowsePoems />} />
+              <Route path="/poems/:id" element={<PoemDetail />} />
+              <Route path="/contests" element={<Contests />} />
+              <Route path="/auth" element={<Auth />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

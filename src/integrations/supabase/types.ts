@@ -9,7 +9,131 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      contests: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          prize: string | null
+          start_date: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          prize?: string | null
+          start_date?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          prize?: string | null
+          start_date?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      poems: {
+        Row: {
+          category: string | null
+          content: string
+          contest_id: string | null
+          id: string
+          status: string
+          submitted_at: string | null
+          title: string
+          user_id: string
+          votes: number
+        }
+        Insert: {
+          category?: string | null
+          content: string
+          contest_id?: string | null
+          id?: string
+          status?: string
+          submitted_at?: string | null
+          title: string
+          user_id: string
+          votes?: number
+        }
+        Update: {
+          category?: string | null
+          content?: string
+          contest_id?: string | null
+          id?: string
+          status?: string
+          submitted_at?: string | null
+          title?: string
+          user_id?: string
+          votes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poems_contest_id_fkey"
+            columns: ["contest_id"]
+            isOneToOne: false
+            referencedRelation: "contests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string
+          role: string
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          role?: string
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          role?: string
+          updated_at?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          id: number
+          site_description: string
+          site_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          id: number
+          site_description?: string
+          site_name?: string
+          updated_at?: string | null
+        }
+        Update: {
+          id?: number
+          site_description?: string
+          site_name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
