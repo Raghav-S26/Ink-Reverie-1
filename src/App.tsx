@@ -14,6 +14,8 @@ import { AuthProvider } from "./context/AuthContext";
 import Auth from "./pages/Auth";
 import SubmitPoem from "./pages/SubmitPoem";
 import Profile from "./pages/Profile";
+import AdminRoute from "./components/AdminRoute";
+import CreateContest from "./pages/CreateContest";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +35,11 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/submit-poem" element={<SubmitPoem />} />
               <Route path="/profile" element={<Profile />} />
+              
+              <Route element={<AdminRoute />}>
+                <Route path="/create-contest" element={<CreateContest />} />
+              </Route>
+
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Route>
