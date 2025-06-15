@@ -1,64 +1,91 @@
 
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 
-const ResetPassword = () => {
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+// Password strength regex: min 8 chars, 1 upper, 1 lower, 1 digit
+const passwordStrengthRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
-  const handleResetPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password.length < 6) {
-      toast.error('Password must be at least 6 characters long.');
-      return;
-    }
-    if (password !== confirmPassword) {
-      toast.error('Passwords do not match.');
-      return;
-    }
-    setLoading(true);
-    const { error } = await supabase.auth.updateUser({ password });
+const resetPasswordSchema = z.object({
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters.')
+    .regex(
+      passwordStrengthRegex,
+      'Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 digit.'
+    ),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Passwords do not match.',
+  path: ['confirmPassword'],
+});
+
+type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
+
+const ResetPassword = () => {
+  const [isPending, setIsPending] = useState(false);
+
+  const form = useForm<ResetPasswordFormValues>({
+    resolver: zodResolver(resetPasswordSchema),
+  });
+
+  const onSubmit = async (values: ResetPasswordFormValues) => {
+    setIsPending(true);
+    const { error } = await supabase.auth.updateUser({ password: values.password });
+    setIsPending(false);
     if (error) {
       toast.error(`Password reset failed: ${error.message}`);
     } else {
-      toast.success('Your password has been reset successfully!');
-      navigate('/auth');
+      toast.success('Password updated successfully!');
     }
-    setLoading(false);
   };
 
   return (
-    <div className="flex justify-center items-center py-12">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Reset Your Password</CardTitle>
-          <CardDescription>Enter and confirm your new password.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleResetPassword} className="space-y-4 pt-4">
-            <div className="space-y-2">
-              <Label htmlFor="password">New Password</Label>
-              <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirm New Password</Label>
-              <Input id="confirm-password" type="password" required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Resetting Password...' : 'Reset Password'}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+    <form
+      onSubmit={form.handleSubmit(onSubmit)}
+      className="mx-auto max-w-sm space-y-6 pt-8"
+    >
+      <div>
+        <label className="block text-sm mb-1" htmlFor="password">
+          New Password
+        </label>
+        <Input
+          id="password"
+          type="password"
+          autoComplete="new-password"
+          {...form.register('password')}
+        />
+        {form.formState.errors.password && (
+          <p className="text-sm text-red-500 mt-1">
+            {form.formState.errors.password.message}
+          </p>
+        )}
+      </div>
+      <div>
+        <label className="block text-sm mb-1" htmlFor="confirmPassword">
+          Confirm New Password
+        </label>
+        <Input
+          id="confirmPassword"
+          type="password"
+          autoComplete="new-password"
+          {...form.register('confirmPassword')}
+        />
+        {form.formState.errors.confirmPassword && (
+          <p className="text-sm text-red-500 mt-1">
+            {form.formState.errors.confirmPassword.message}
+          </p>
+        )}
+      </div>
+      <Button type="submit" className="w-full" disabled={isPending}>
+        {isPending ? 'Resetting...' : 'Reset Password'}
+      </Button>
+    </form>
   );
 };
 

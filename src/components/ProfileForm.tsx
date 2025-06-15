@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,10 +12,26 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import { Tables } from '@/integrations/supabase/types';
 
+const MAX_AVATAR_SIZE = 2 * 1024 * 1024; // 2MB
+
 const profileFormSchema = z.object({
   username: z.string().min(3, 'Username must be at least 3 characters long.').max(50, 'Username cannot be longer than 50 characters.'),
   full_name: z.string().max(100, 'Full name cannot be longer than 100 characters.').optional().or(z.literal('')),
-  avatar_file: z.instanceof(File).optional(),
+  avatar_file: z
+    .instanceof(File)
+    .optional()
+    .refine(
+      (file) => !file || file.size <= MAX_AVATAR_SIZE,
+      'Avatar must be 2MB or less.'
+    )
+    .refine(
+      (file) =>
+        !file ||
+        ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(
+          file.type
+        ),
+      'Only PNG, JPEG, GIF, or WEBP images allowed.'
+    ),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -114,11 +129,24 @@ const ProfileForm = ({ profile }: ProfileFormProps) => {
                   </Avatar>
                   <Input
                     type="file"
-                    accept="image/png, image/jpeg, image/gif"
+                    accept="image/png, image/jpeg, image/gif, image/webp"
                     className="max-w-xs"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
+                        // Frontend file size/type validation for extra UX
+                        if (file.size > MAX_AVATAR_SIZE) {
+                          toast.error("Avatar must be 2MB or less.");
+                          return;
+                        }
+                        if (
+                          !["image/jpeg", "image/png", "image/gif", "image/webp"].includes(
+                            file.type
+                          )
+                        ) {
+                          toast.error("Only PNG, JPEG, GIF, or WEBP images allowed.");
+                          return;
+                        }
                         field.onChange(file);
                         setAvatarPreview(URL.createObjectURL(file));
                       }
