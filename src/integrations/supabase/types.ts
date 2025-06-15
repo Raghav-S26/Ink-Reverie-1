@@ -200,6 +200,32 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_public_poem_details: {
+        Args: { p_poem_id: string }
+        Returns: {
+          id: string
+          title: string
+          content: string
+          category: string
+          votes: number
+          submitted_at: string
+          author_name: string
+          author_avatar_url: string
+          user_has_voted: boolean
+        }[]
+      }
+      get_public_poems_with_authors: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          title: string
+          content: string
+          category: string
+          votes: number
+          author_name: string
+          author_avatar_url: string
+        }[]
+      }
       get_user_role: {
         Args: { p_user_id: string }
         Returns: string
