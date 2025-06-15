@@ -47,14 +47,18 @@ const SubmitPoem = () => {
   async function onSubmit(values: PoemFormValues) {
     console.log("Poem submission initiated. Form values:", values);
     
-    if (!user || !profile) {
+    if (!user) {
       toast.error("Authentication error. You must be logged in to submit a poem.");
-      console.error("SubmitPoem Error: User or Profile object is missing despite an active session.");
+      console.error("SubmitPoem Error: User object is missing despite an active session.");
       navigate("/auth");
       return;
     }
     
-    console.log(`Submitting for user ID: ${user.id} with profile:`, profile);
+    if (!profile) {
+      console.warn("SubmitPoem Warning: User profile is missing. Poem will be submitted, but author info might not appear elsewhere.");
+    }
+    
+    console.log(`Submitting for user ID: ${user.id}`);
 
     try {
       const { data, error } = await supabase.from("poems").insert([
