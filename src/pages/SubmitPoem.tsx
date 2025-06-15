@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -56,13 +55,13 @@ const SubmitPoem = () => {
       return;
     }
 
-    // Explicitly set status to 'submitted' for a clear workflow.
+    // The 'status' field is no longer needed here.
+    // The database will now default it to 'approved'.
     const poemData = {
       title: values.title,
       content: values.content,
       category: values.category || null,
       user_id: user.id,
-      status: 'submitted',
     };
     
     console.log(`Submitting poem for user ID: ${user.id}. Payload:`, poemData);
@@ -79,24 +78,15 @@ const SubmitPoem = () => {
         if (error.message.includes("violates row-level security policy")) {
           throw new Error("You do not have permission to publish this poem. Please try logging in again.");
         }
-        // Handle case where .single() finds no rows after insert (RLS issue on select)
-        if (error.code === 'PGRST116') {
-             console.warn("Poem submission seemed to succeed, but no data was returned. This is likely an RLS issue on SELECT.");
-             toast.info("Poem submitted for review.", {
-               description: "You'll be able to see it on your profile once it's processed."
-             });
-             navigate("/poems"); 
-             return;
-        }
         throw new Error(error.message);
       }
 
-      console.log("Poem successfully inserted into Supabase:", data);
-      toast.success("Your poem has been submitted successfully!");
+      console.log("Poem successfully published to Supabase:", data);
+      toast.success("Your poem has been published successfully!");
       navigate("/poems");
 
     } catch (error: any) {
-      toast.error("Failed to submit poem", {
+      toast.error("Failed to publish poem", {
         description: error.message,
       });
       console.error("Full error during poem submission:", error);
@@ -163,7 +153,7 @@ const SubmitPoem = () => {
           />
           
           <Button type="submit" className="w-full bg-brand-indigo hover:bg-brand-indigo/90" disabled={isSubmitting}>
-            {isSubmitting ? "Submitting..." : "Submit Poem"}
+            {isSubmitting ? "Publishing..." : "Publish Poem"}
           </Button>
         </form>
       </Form>
