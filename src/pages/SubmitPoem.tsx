@@ -1,10 +1,11 @@
+
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PoemSchema, PoemFormValues } from "@/lib/validators/poem";
@@ -20,7 +21,7 @@ import {
 import { useEffect } from "react";
 
 const SubmitPoem = () => {
-  const { user, session, profile } = useAuth();
+  const { user, session } = useAuth();
   const navigate = useNavigate();
 
   // Redirect to login if not authenticated
@@ -55,13 +56,14 @@ const SubmitPoem = () => {
       return;
     }
 
-    // The 'status' field is no longer needed here.
-    // The database will now default it to 'approved'.
+    // Explicitly set status to 'approved' to satisfy validation
+    // and align with the auto-approval feature.
     const poemData = {
       title: values.title,
       content: values.content,
       category: values.category || null,
       user_id: user.id,
+      status: 'approved',
     };
     
     console.log(`Submitting poem for user ID: ${user.id}. Payload:`, poemData);
