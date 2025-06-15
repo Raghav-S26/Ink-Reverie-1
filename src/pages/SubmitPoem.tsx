@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,89 +6,138 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { PoemSchema, PoemFormValues } from "@/lib/validators/poem";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormDescription,
+} from "@/components/ui/form";
 
 const SubmitPoem = () => {
   const { user, session } = useAuth();
   const navigate = useNavigate();
 
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [category, setCategory] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const form = useForm<PoemFormValues>({
+    resolver: zodResolver(PoemSchema),
+    defaultValues: {
+      title: "",
+      content: "",
+      category: "",
+    },
+    mode: "onChange",
+  });
+
+  const { isSubmitting } = form.formState;
 
   // Redirect to login if not authenticated
   if (!session) {
+    toast.info("Please log in to submit a poem.");
     navigate("/auth");
     return null;
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!title.trim() || !content.trim()) {
-      toast.error("Title and content are required.");
+  async function onSubmit(values: PoemFormValues) {
+    console.log("Attempting to submit poem with values:", values);
+    if (!user) {
+      toast.error("Authentication error. Please log in again.");
+      console.error("SubmitPoem Error: User object is missing despite an active session.");
+      navigate("/auth");
       return;
     }
 
-    setSubmitting(true);
+    try {
+      const { error } = await supabase.from("poems").insert([
+        {
+          title: values.title,
+          content: values.content,
+          category: values.category || null,
+          user_id: user.id,
+          status: 'approved', // Auto-approval as defined in our RLS policies
+        },
+      ]);
 
-    const { error } = await supabase.from("poems").insert([
-      {
-        title,
-        content,
-        category: category || null,
-        user_id: user?.id,
-        status: 'approved', // Explicitly set status to 'approved' for auto-approval
-      },
-    ]);
-    setSubmitting(false);
+      if (error) {
+        throw error;
+      }
 
-    if (error) {
-      toast.error("Failed to submit poem: " + error.message);
-    } else {
       toast.success("Your poem has been published successfully!");
       navigate("/poems");
+
+    } catch (error: any) {
+      toast.error("Failed to submit poem. " + error.message);
+      console.error("Supabase insert error:", {
+        message: error.message,
+        details: error.details,
+        code: error.code,
+      });
     }
   }
 
   return (
     <div className="max-w-xl mx-auto bg-white rounded-lg shadow p-8 my-12">
       <h1 className="text-3xl font-bold mb-6 font-serif text-center">Submit a Poem</h1>
-      <form className="space-y-5" onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="title" className="font-medium block mb-1">Poem Title</label>
-          <Input
-            id="title"
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            placeholder="Enter your poem's title"
-            required
+      <Form {...form}>
+        <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Poem Title</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter your poem's title" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
-        <div>
-          <label htmlFor="category" className="font-medium block mb-1">Category <span className="text-sm text-gray-400">(Optional)</span></label>
-          <Input
-            id="category"
-            value={category}
-            onChange={e => setCategory(e.target.value)}
-            placeholder="E.g. Nature, Love, Life"
+
+          <FormField
+            control={form.control}
+            name="category"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Category</FormLabel>
+                <FormControl>
+                  <Input placeholder="E.g. Nature, Love, Life" {...field} />
+                </FormControl>
+                <FormDescription>
+                  Optional, but helps others discover your work.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
-        <div>
-          <label htmlFor="content" className="font-medium block mb-1">Poem Text</label>
-          <Textarea
-            id="content"
-            value={content}
-            onChange={e => setContent(e.target.value)}
-            placeholder="Write your poem here..."
-            minLength={10}
-            required
-            rows={8}
+
+          <FormField
+            control={form.control}
+            name="content"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Poem Text</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Write your poem here..."
+                    rows={10}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
-        <Button type="submit" className="w-full bg-brand-indigo hover:bg-brand-indigo/90" disabled={submitting}>
-          {submitting ? "Submitting..." : "Submit Poem"}
-        </Button>
-      </form>
+          
+          <Button type="submit" className="w-full bg-brand-indigo hover:bg-brand-indigo/90" disabled={isSubmitting}>
+            {isSubmitting ? "Submitting..." : "Submit Poem"}
+          </Button>
+        </form>
+      </Form>
     </div>
   );
 };
