@@ -17,3 +17,5 @@ export type PoemDetailData = PoemWithAuthor & {
 };
 
 export type Contest = Tables<'contests'>;
+
+export type Profile = Tables<'profiles'>;
