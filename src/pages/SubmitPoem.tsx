@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -46,35 +45,37 @@ const SubmitPoem = () => {
 
   async function onSubmit(values: PoemFormValues) {
     console.log("Poem submission initiated. Form values:", values);
-    
+
     if (!user) {
-      toast.error("Authentication error. You must be logged in to submit a poem.");
+      toast.error("Authentication error", {
+        description: "You must be logged in to submit a poem.",
+      });
       console.error("SubmitPoem Error: User object is missing despite an active session.");
       navigate("/auth");
       return;
     }
+
+    const poemData = {
+      title: values.title,
+      content: values.content,
+      category: values.category || null,
+      user_id: user.id,
+      status: 'approved',
+    };
     
-    if (!profile) {
-      console.warn("SubmitPoem Warning: User profile is missing. Poem will be submitted, but author info might not appear elsewhere.");
-    }
-    
-    console.log(`Submitting for user ID: ${user.id}`);
+    console.log(`Submitting poem for user ID: ${user.id}. Payload:`, poemData);
 
     try {
-      const { data, error } = await supabase.from("poems").insert([
-        {
-          title: values.title,
-          content: values.content,
-          // Ensure empty string becomes null for the database
-          category: values.category || null,
-          user_id: user.id,
-          // Status is auto-approved based on our RLS policy
-          status: 'approved',
-        },
-      ]).select();
+      const { data, error } = await supabase
+        .from("poems")
+        .insert(poemData)
+        .select();
 
       if (error) {
         console.error("Supabase insert error object:", error);
+        if (error.message.includes("violates row-level security policy")) {
+          throw new Error("You do not have permission to publish this poem. Please try logging in again.");
+        }
         throw new Error(error.message);
       }
 
@@ -83,7 +84,9 @@ const SubmitPoem = () => {
       navigate("/poems");
 
     } catch (error: any) {
-      toast.error("Failed to submit poem: " + error.message);
+      toast.error("Failed to submit poem", {
+        description: error.message,
+      });
       console.error("Full error during poem submission:", error);
     }
   }
