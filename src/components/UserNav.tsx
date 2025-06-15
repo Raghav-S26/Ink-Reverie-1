@@ -24,7 +24,7 @@ const UserNav = () => {
 
   if (!session) {
     return (
-      <Button asChild className="bg-brand-indigo hover:bg-brand-indigo/90">
+      <Button asChild className="bg-primary hover:bg-primary/90">
         <Link to="/auth">Login / Sign Up</Link>
       </Button>
     );
