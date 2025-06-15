@@ -21,16 +21,16 @@ import {
 import { useEffect } from "react";
 
 const SubmitPoem = () => {
-  const { user, session } = useAuth();
+  const { user, session, loading } = useAuth();
   const navigate = useNavigate();
 
   // Redirect to login if not authenticated
   useEffect(() => {
-    if (!session) {
+    if (!loading && !session) {
       toast.info("Please log in to submit a poem.");
       navigate("/auth");
     }
-  }, [session, navigate]);
+  }, [session, navigate, loading]);
 
   const form = useForm<PoemFormValues>({
     resolver: zodResolver(PoemSchema),
@@ -95,8 +95,8 @@ const SubmitPoem = () => {
     }
   }
   
-  if (!session) {
-    // Render nothing while redirecting
+  if (loading || !session) {
+    // Render nothing while loading or redirecting
     return null;
   }
 
