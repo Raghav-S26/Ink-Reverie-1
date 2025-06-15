@@ -32,14 +32,13 @@ const SubmitPoem = () => {
 
     setSubmitting(true);
 
-    // Always set status to 'submitted'. Frontend cannot set 'approved'
     const { error } = await supabase.from("poems").insert([
       {
         title,
         content,
         category: category || null,
         user_id: user?.id,
-        // status: 'submitted' is default per DB, do not set 'approved' here
+        status: 'approved', // Explicitly set status to 'approved' for auto-approval
       },
     ]);
     setSubmitting(false);
@@ -47,7 +46,7 @@ const SubmitPoem = () => {
     if (error) {
       toast.error("Failed to submit poem: " + error.message);
     } else {
-      toast.success("Your poem has been submitted and is pending review.");
+      toast.success("Your poem has been published successfully!");
       navigate("/poems");
     }
   }
@@ -96,4 +95,3 @@ const SubmitPoem = () => {
 };
 
 export default SubmitPoem;
-
