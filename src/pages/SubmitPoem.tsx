@@ -56,12 +56,13 @@ const SubmitPoem = () => {
       return;
     }
 
-    // Rely on the database to set the default status
+    // Explicitly set status to 'submitted' for a clear workflow.
     const poemData = {
       title: values.title,
       content: values.content,
       category: values.category || null,
       user_id: user.id,
+      status: 'submitted',
     };
     
     console.log(`Submitting poem for user ID: ${user.id}. Payload:`, poemData);
@@ -70,18 +71,28 @@ const SubmitPoem = () => {
       const { data, error } = await supabase
         .from("poems")
         .insert(poemData)
-        .select();
+        .select()
+        .single(); // Use single() to expect one row back
 
       if (error) {
         console.error("Supabase insert error object:", error);
         if (error.message.includes("violates row-level security policy")) {
           throw new Error("You do not have permission to publish this poem. Please try logging in again.");
         }
+        // Handle case where .single() finds no rows after insert (RLS issue on select)
+        if (error.code === 'PGRST116') {
+             console.warn("Poem submission seemed to succeed, but no data was returned. This is likely an RLS issue on SELECT.");
+             toast.info("Poem submitted for review.", {
+               description: "You'll be able to see it on your profile once it's processed."
+             });
+             navigate("/poems"); 
+             return;
+        }
         throw new Error(error.message);
       }
 
       console.log("Poem successfully inserted into Supabase:", data);
-      toast.success("Your poem has been published successfully!");
+      toast.success("Your poem has been submitted successfully!");
       navigate("/poems");
 
     } catch (error: any) {
@@ -161,4 +172,3 @@ const SubmitPoem = () => {
 };
 
 export default SubmitPoem;
-
