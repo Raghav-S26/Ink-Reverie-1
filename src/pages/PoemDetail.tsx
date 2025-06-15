@@ -1,10 +1,10 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import NotFound from "./NotFound";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, MessageSquare, Share2 } from "lucide-react";
+import { Heart, MessageSquare, Share2, Trash2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PoemDetailData } from "@/lib/types";
@@ -14,6 +14,17 @@ import CommentSection from "@/components/CommentSection";
 import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
 import { motion, useAnimate } from "framer-motion";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const fetchPoem = async (id: string): Promise<PoemDetailData | null> => {
     const { data, error } = await supabase
@@ -28,7 +39,8 @@ const fetchPoem = async (id: string): Promise<PoemDetailData | null> => {
 
 const PoemDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { session } = useAuth();
+  const { session, profile } = useAuth();
+  const navigate = useNavigate();
   const [scope, animate] = useAnimate();
 
   const { data: poem, isLoading, isError, refetch } = useQuery({
@@ -39,6 +51,7 @@ const PoemDetail = () => {
 
   const [likeLoading, setLikeLoading] = useState(false);
   const [shareLoading, setShareLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Handle liking a poem
   const handleLike = async () => {
@@ -90,6 +103,21 @@ const PoemDetail = () => {
       toast.error("Failed to copy link.");
     }
     setShareLoading(false);
+  };
+
+  // Handle deleting a poem
+  const handleDelete = async () => {
+    if (!poem) return;
+    setIsDeleting(true);
+    const { error } = await supabase.from("poems").delete().eq("id", poem.id);
+
+    if (error) {
+      toast.error("Failed to delete poem: " + error.message);
+      setIsDeleting(false);
+    } else {
+      toast.success("Poem deleted successfully.");
+      navigate("/poems");
+    }
   };
 
   if (isLoading) {
@@ -156,6 +184,32 @@ const PoemDetail = () => {
             <Button variant="outline" className="flex items-center gap-2" disabled>
               <MessageSquare className="h-5 w-5 text-brand-indigo" /> Comment
             </Button>
+
+            {profile?.role === 'admin' && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive">
+                    <Trash2 />
+                    Delete Poem
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete this
+                      poem from our servers.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+                      {isDeleting ? "Deleting..." : "Yes, delete poem"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </div>
           {/* Comment Section */}
           <div className="mt-12 border-t pt-8">

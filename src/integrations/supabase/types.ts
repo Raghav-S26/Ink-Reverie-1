@@ -233,6 +233,10 @@ export type Database = {
           author_avatar_url: string
         }[]
       }
+      get_user_role: {
+        Args: { p_user_id: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
