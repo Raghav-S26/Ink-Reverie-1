@@ -1,37 +1,65 @@
 
 import { useParams, Link } from "react-router-dom";
-import { poems } from "@/lib/mock-data";
 import NotFound from "./NotFound";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Heart, MessageSquare, Share2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { PoemDetailData } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const fetchPoem = async (id: string): Promise<PoemDetailData | null> => {
+    const { data, error } = await supabase
+        .rpc('get_public_poem_details', { poem_id: id })
+        .single();
+    if (error && error.code !== 'PGRST116') { // Ignore 'exact one row' error for not found
+        throw new Error(error.message);
+    }
+    return data;
+};
+
 
 const PoemDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const poem = poems.find((p) => p.id === id);
 
-  if (!poem) {
+  const { data: poem, isLoading, isError } = useQuery({
+    queryKey: ["poem", id],
+    queryFn: () => fetchPoem(id!),
+    enabled: !!id,
+  });
+
+  if (isLoading) {
+      return (
+          <div className="max-w-4xl mx-auto space-y-8">
+              <Skeleton className="h-48 w-full" />
+              <Skeleton className="h-96 w-full" />
+          </div>
+      )
+  }
+
+  if (isError || !poem) {
     return <NotFound />;
   }
 
-  const { title, author, content, category, submissionDate, votes } = poem;
+  const { title, author_name, author_avatar_url, content, category, submitted_at, votes } = poem;
 
   return (
     <div className="max-w-4xl mx-auto">
       <Card className="overflow-hidden">
         <CardHeader className="bg-gray-50 p-8">
-          <Badge variant="secondary" className="w-fit">{category}</Badge>
+          {category && <Badge variant="secondary" className="w-fit">{category}</Badge>}
           <h1 className="font-serif text-4xl md:text-5xl font-bold mt-4">{title}</h1>
           <div className="flex items-center gap-4 mt-4">
             <Avatar>
-              <AvatarImage src={author.avatar} alt={author.name} />
-              <AvatarFallback>{author.name.charAt(0)}</AvatarFallback>
+              <AvatarImage src={author_avatar_url || undefined} alt={author_name || 'Anonymous'} />
+              <AvatarFallback>{author_name?.charAt(0) || 'A'}</AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-semibold">{author.name}</p>
-              <p className="text-sm text-gray-500">Published on {new Date(submissionDate).toLocaleDateString()}</p>
+              <p className="font-semibold">{author_name || 'Anonymous'}</p>
+              {submitted_at && <p className="text-sm text-gray-500">Published on {new Date(submitted_at).toLocaleDateString()}</p>}
             </div>
           </div>
         </CardHeader>

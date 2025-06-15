@@ -2,7 +2,7 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import type { Contest } from "@/lib/mock-data";
+import type { Contest } from "@/lib/types";
 import { Calendar, Trophy } from "lucide-react";
 
 interface ContestCardProps {
@@ -23,14 +23,18 @@ const ContestCard = ({ contest }: ContestCardProps) => {
           <CardDescription>{contest.description}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
-            <div className="flex items-center gap-2 text-gray-600">
-                <Calendar className="h-4 w-4 text-brand-indigo"/>
-                <span>Deadline: {new Date(contest.deadline).toLocaleDateString()}</span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-600">
-                <Trophy className="h-4 w-4 text-brand-gold"/>
-                <span>Prize: {contest.prize}</span>
-            </div>
+            {contest.end_date && (
+                <div className="flex items-center gap-2 text-gray-600">
+                    <Calendar className="h-4 w-4 text-brand-indigo"/>
+                    <span>Deadline: {new Date(contest.end_date).toLocaleDateString()}</span>
+                </div>
+            )}
+            {contest.prize && (
+                <div className="flex items-center gap-2 text-gray-600">
+                    <Trophy className="h-4 w-4 text-brand-gold"/>
+                    <span>Prize: {contest.prize}</span>
+                </div>
+            )}
         </CardContent>
         <CardFooter>
           <Button className="w-full bg-brand-gold hover:bg-brand-gold/90 text-white">View & Enter</Button>

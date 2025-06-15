@@ -139,7 +139,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_public_poem_details: {
+        Args: { poem_id: string }
+        Returns: {
+          id: string
+          title: string
+          content: string
+          category: string
+          votes: number
+          submitted_at: string
+          author_name: string
+          author_avatar_url: string
+        }[]
+      }
+      get_public_poems_with_authors: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          title: string
+          content: string
+          category: string
+          votes: number
+          author_name: string
+          author_avatar_url: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

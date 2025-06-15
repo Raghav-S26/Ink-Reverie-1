@@ -4,12 +4,34 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import PoemCard from "@/components/PoemCard";
 import ContestCard from "@/components/ContestCard";
-import { poems, contests } from "@/lib/mock-data";
 import { ArrowRight } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { PoemWithAuthor, Contest } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const fetchFeaturedPoems = async (): Promise<PoemWithAuthor[]> => {
+  const { data, error } = await supabase.rpc('get_public_poems_with_authors').limit(3);
+  if (error) throw new Error(error.message);
+  return data || [];
+};
+
+const fetchActiveContests = async (): Promise<Contest[]> => {
+    const { data, error } = await supabase.from('contests').select('*').order('end_date').limit(2);
+    if (error) throw new Error(error.message);
+    return data || [];
+}
 
 const Index = () => {
-  const featuredPoems = poems.slice(0, 3);
-  const activeContests = contests.slice(0, 2);
+  const { data: featuredPoems, isLoading: poemsLoading } = useQuery({
+    queryKey: ["featuredPoems"],
+    queryFn: fetchFeaturedPoems,
+  });
+
+  const { data: activeContests, isLoading: contestsLoading } = useQuery({
+      queryKey: ['activeContests'],
+      queryFn: fetchActiveContests
+  });
 
   return (
     <div className="space-y-16">
@@ -45,9 +67,13 @@ const Index = () => {
             </Link>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {featuredPoems.map((poem) => (
-            <PoemCard key={poem.id} poem={poem} />
-          ))}
+          {poemsLoading ? (
+            [...Array(3)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)
+          ) : (
+            featuredPoems?.map((poem) => (
+              <PoemCard key={poem.id} poem={poem} />
+            ))
+          )}
         </div>
       </section>
 
@@ -60,9 +86,13 @@ const Index = () => {
             </Link>
         </div>
         <div className="grid md:grid-cols-2 gap-8">
-          {activeContests.map((contest) => (
-            <ContestCard key={contest.id} contest={contest} />
-          ))}
+          {contestsLoading ? (
+            [...Array(2)].map((_, i) => <Skeleton key={i} className="h-48 w-full" />)
+          ) : (
+            activeContests?.map((contest) => (
+              <ContestCard key={contest.id} contest={contest} />
+            ))
+          )}
         </div>
       </section>
     </div>

@@ -3,15 +3,16 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
-import type { Poem } from "@/lib/mock-data";
+import { PoemWithAuthor } from "@/lib/types";
 
 interface PoemCardProps {
-  poem: Poem;
+  poem: PoemWithAuthor;
 }
 
 const PoemCard = ({ poem }: PoemCardProps) => {
+  const excerpt = poem.content.substring(0, 100) + (poem.content.length > 100 ? "..." : "");
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -22,13 +23,13 @@ const PoemCard = ({ poem }: PoemCardProps) => {
       <Card className="h-full flex flex-col overflow-hidden transition-shadow hover:shadow-xl">
         <CardHeader>
           <CardTitle className="font-serif text-2xl">{poem.title}</CardTitle>
-          <p className="text-sm text-gray-500">by {poem.author.name}</p>
+          <p className="text-sm text-gray-500">by {poem.author_name || 'Anonymous'}</p>
         </CardHeader>
         <CardContent className="flex-grow">
-          <p className="text-gray-700 italic font-serif leading-relaxed">{poem.excerpt}</p>
+          <p className="text-gray-700 italic font-serif leading-relaxed">{excerpt}</p>
         </CardContent>
         <CardFooter className="flex justify-between items-center">
-          <Badge variant="secondary">{poem.category}</Badge>
+          {poem.category && <Badge variant="secondary">{poem.category}</Badge>}
           <div className="flex items-center gap-2 text-gray-500">
             <Heart className="h-4 w-4 text-pink-400" />
             <span>{poem.votes}</span>
