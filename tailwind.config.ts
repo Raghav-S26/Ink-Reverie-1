@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -24,9 +23,12 @@ export default {
                 sans: ['Inter', 'sans-serif'],
             },
 			colors: {
-                'brand-indigo': '#4338CA',
-                'brand-gold': '#F59E0B',
-                'brand-pastel': '#FBCFE8',
+                'brand-purple-deep': '#4c1d95',
+                'brand-indigo-royal': '#3730a3',
+                'brand-plum': '#7c2d92',
+                'brand-rose': '#f472b6',
+                'brand-sage': '#10b981',
+                'brand-paper': '#fefcf8',
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',

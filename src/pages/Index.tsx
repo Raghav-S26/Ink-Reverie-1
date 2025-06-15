@@ -48,7 +48,7 @@ const Index = () => {
           Join a vibrant community of poets. Share your voice, enter contests, and discover your next inspiration.
         </p>
         <div className="mt-8 flex justify-center gap-4">
-          <Button asChild size="lg" className="bg-brand-indigo hover:bg-brand-indigo/90">
+          <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
             <Link to="/poems">Explore Poetry</Link>
           </Button>
           <Button asChild size="lg" variant="outline">
@@ -61,7 +61,7 @@ const Index = () => {
       <section>
         <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-bold font-serif">Featured Poems</h2>
-            <Link to="/poems" className="flex items-center gap-1 text-brand-indigo hover:underline">
+            <Link to="/poems" className="flex items-center gap-1 text-primary hover:underline">
                 View All <ArrowRight className="h-4 w-4" />
             </Link>
         </div>
@@ -80,7 +80,7 @@ const Index = () => {
       <section>
         <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-bold font-serif">Active Contests</h2>
-            <Link to="/contests" className="flex items-center gap-1 text-brand-indigo hover:underline">
+            <Link to="/contests" className="flex items-center gap-1 text-primary hover:underline">
                 View All <ArrowRight className="h-4 w-4" />
             </Link>
         </div>

@@ -20,13 +20,13 @@ const PoemCard = ({ poem }: PoemCardProps) => {
       transition={{ duration: 0.5 }}
       whileHover={{ y: -5 }}
     >
-      <Card className="h-full flex flex-col overflow-hidden transition-shadow hover:shadow-xl">
+      <Card className="h-full flex flex-col overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 bg-card/60 backdrop-blur-sm">
         <CardHeader>
           <CardTitle className="font-serif text-2xl">{poem.title}</CardTitle>
           <p className="text-sm text-muted-foreground">by {poem.author_name || 'Anonymous'}</p>
         </CardHeader>
         <CardContent className="flex-grow">
-          <p className="text-foreground italic font-serif leading-relaxed">{excerpt}</p>
+          <p className="text-foreground/90 italic font-serif leading-relaxed">{excerpt}</p>
         </CardContent>
         <CardFooter className="flex justify-between items-center">
           {poem.category && <Badge variant="secondary">{poem.category}</Badge>}
@@ -35,7 +35,7 @@ const PoemCard = ({ poem }: PoemCardProps) => {
             <span>{poem.votes}</span>
           </div>
         </CardFooter>
-        <Link to={`/poems/${poem.id}`} className="block bg-secondary text-center p-3 font-semibold text-brand-indigo hover:bg-accent transition-colors">
+        <Link to={`/poems/${poem.id}`} className="block bg-secondary/90 text-center p-3 font-semibold text-secondary-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
             Read More
         </Link>
       </Card>
