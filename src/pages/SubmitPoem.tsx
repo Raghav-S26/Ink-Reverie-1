@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -55,12 +56,12 @@ const SubmitPoem = () => {
       return;
     }
 
+    // Rely on the database to set the default status
     const poemData = {
       title: values.title,
       content: values.content,
       category: values.category || null,
       user_id: user.id,
-      status: 'approved',
     };
     
     console.log(`Submitting poem for user ID: ${user.id}. Payload:`, poemData);
@@ -160,3 +161,4 @@ const SubmitPoem = () => {
 };
 
 export default SubmitPoem;
+
