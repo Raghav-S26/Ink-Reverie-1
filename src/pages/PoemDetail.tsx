@@ -1,4 +1,3 @@
-
 import { useParams, Link } from "react-router-dom";
 import NotFound from "./NotFound";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -14,6 +13,7 @@ import { toast } from "@/components/ui/sonner";
 import CommentSection from "@/components/CommentSection";
 import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
+import { motion, useAnimate } from "framer-motion";
 
 const fetchPoem = async (id: string): Promise<PoemDetailData | null> => {
     const { data, error } = await supabase
@@ -29,6 +29,7 @@ const fetchPoem = async (id: string): Promise<PoemDetailData | null> => {
 const PoemDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { session } = useAuth();
+  const [scope, animate] = useAnimate();
 
   const { data: poem, isLoading, isError, refetch } = useQuery({
     queryKey: ["poem", id],
@@ -47,6 +48,7 @@ const PoemDetail = () => {
     }
     if (!poem) return;
 
+    animate(scope.current, { scale: [1, 1.3, 1] }, { duration: 0.3 });
     setLikeLoading(true);
 
     if (poem.user_has_voted) {
@@ -137,7 +139,9 @@ const PoemDetail = () => {
               disabled={likeLoading || !session}
               title={!session ? "You must be logged in to like poems" : ""}
             >
-              <Heart className={`h-5 w-5 text-pink-500 ${user_has_voted ? 'fill-current' : ''}`} /> 
+              <span ref={scope}>
+                <Heart className={`h-5 w-5 text-pink-500 transition-colors ${user_has_voted ? 'fill-current' : ''}`} />
+              </span>
               {likeLoading ? "..." : <>{user_has_voted ? 'Unlike' : 'Like'} ({votes})</>}
             </Button>
             <Button 
