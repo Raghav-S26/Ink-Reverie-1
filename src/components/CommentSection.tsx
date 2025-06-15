@@ -26,14 +26,15 @@ const fetchComments = async (poemId: string): Promise<Comment[]> => {
     .from("comments")
     .select(`
       id, content, user_id, created_at,
-      profiles:profile_id (
+      profile:profiles (
         full_name, username, avatar_url
       )
     `)
     .eq("poem_id", poemId)
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return data || [];
+  // The type generation might be lagging, so we cast to any first.
+  return (data as any) || [];
 };
 
 const CommentSection = ({ poemId }: { poemId: string }) => {
@@ -135,4 +136,3 @@ const CommentSection = ({ poemId }: { poemId: string }) => {
 };
 
 export default CommentSection;
-

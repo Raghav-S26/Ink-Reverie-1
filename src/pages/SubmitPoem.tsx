@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -38,7 +37,7 @@ const SubmitPoem = () => {
         content,
         category: category || null,
         user_id: user?.id,
-        status: "submitted",
+        status: "approved",
       },
     ]);
     setSubmitting(false);
