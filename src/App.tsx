@@ -16,6 +16,7 @@ import SubmitPoem from "./pages/SubmitPoem";
 import Profile from "./pages/Profile";
 import AdminRoute from "./components/AdminRoute";
 import CreateContest from "./pages/CreateContest";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/submit-poem" element={<SubmitPoem />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               
               <Route element={<AdminRoute />}>
                 <Route path="/create-contest" element={<CreateContest />} />

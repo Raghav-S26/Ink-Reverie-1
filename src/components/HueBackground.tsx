@@ -1,10 +1,10 @@
 
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { useEffect } from 'react';
-import { useMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const HueBackground = () => {
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   const mouseX = useMotionValue(typeof window !== 'undefined' ? window.innerWidth / 2 : 0);
   const mouseY = useMotionValue(typeof window !== 'undefined' ? window.innerHeight / 2 : 0);
 
