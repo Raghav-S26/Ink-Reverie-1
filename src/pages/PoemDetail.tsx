@@ -1,3 +1,4 @@
+
 import { useParams, Link } from "react-router-dom";
 import NotFound from "./NotFound";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -40,22 +41,41 @@ const PoemDetail = () => {
 
   // Handle liking a poem
   const handleLike = async () => {
-    if (!session) {
+    if (!session?.user) {
       toast.error("You need to be logged in to like poems.");
       return;
     }
+    if (!poem) return;
+
     setLikeLoading(true);
-    const { error } = await supabase
-      .from("poems")
-      .update({ votes: (poem?.votes ?? 0) + 1 })
-      .eq("id", id!);
-    setLikeLoading(false);
-    if (error) {
-      toast.error("Failed to like poem: " + error.message);
+
+    if (poem.user_has_voted) {
+      // User has already liked, so unlike it.
+      const { error } = await supabase
+        .from('poem_votes')
+        .delete()
+        .match({ poem_id: poem.id, user_id: session.user.id });
+      
+      if (error) {
+        toast.error("Failed to unlike poem: " + error.message);
+      } else {
+        toast.success("Unliked!");
+      }
     } else {
-      toast.success("Liked! ❤️");
-      refetch();
+      // User has not liked, so like it.
+      const { error } = await supabase
+        .from('poem_votes')
+        .insert({ poem_id: poem.id, user_id: session.user.id });
+
+      if (error) {
+        toast.error("Failed to like poem: " + error.message);
+      } else {
+        toast.success("Liked! ❤️");
+      }
     }
+    setLikeLoading(false);
+    // Refetch poem data to update vote count and button state
+    refetch();
   };
 
   // Handle sharing a poem (copy URL)
@@ -83,7 +103,7 @@ const PoemDetail = () => {
     return <NotFound />;
   }
 
-  const { title, author_name, author_avatar_url, content, category, submitted_at, votes } = poem;
+  const { title, author_name, author_avatar_url, content, category, submitted_at, votes, user_has_voted } = poem;
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -111,13 +131,14 @@ const PoemDetail = () => {
         
           <div className="mt-12 pt-8 border-t flex flex-wrap items-center gap-4">
             <Button 
-              variant="outline" 
+              variant={user_has_voted ? "secondary" : "outline"}
               className="flex items-center gap-2" 
               onClick={handleLike}
-              disabled={likeLoading}
+              disabled={likeLoading || !session}
+              title={!session ? "You must be logged in to like poems" : ""}
             >
-              <Heart className="h-5 w-5 text-pink-500" /> 
-              {likeLoading ? "Liking..." : <>Like ({votes})</>}
+              <Heart className={`h-5 w-5 text-pink-500 ${user_has_voted ? 'fill-current' : ''}`} /> 
+              {likeLoading ? "..." : <>{user_has_voted ? 'Unlike' : 'Like'} ({votes})</>}
             </Button>
             <Button 
               variant="outline" 

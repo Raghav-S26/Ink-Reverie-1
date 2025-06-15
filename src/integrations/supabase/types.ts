@@ -78,6 +78,35 @@ export type Database = {
         }
         Relationships: []
       }
+      poem_votes: {
+        Row: {
+          created_at: string | null
+          id: string
+          poem_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          poem_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          poem_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poem_votes_poem_id_fkey"
+            columns: ["poem_id"]
+            isOneToOne: false
+            referencedRelation: "poems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       poems: {
         Row: {
           category: string | null
@@ -189,6 +218,7 @@ export type Database = {
           submitted_at: string
           author_name: string
           author_avatar_url: string
+          user_has_voted: boolean
         }[]
       }
       get_public_poems_with_authors: {
