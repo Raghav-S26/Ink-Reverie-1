@@ -17,8 +17,37 @@ import Profile from "./pages/Profile";
 import AdminRoute from "./components/AdminRoute";
 import CreateContest from "./pages/CreateContest";
 import ResetPassword from "./pages/ResetPassword";
+import { useNotifications } from "@/hooks/useNotifications";
 
 const queryClient = new QueryClient();
+
+const AppContent = () => {
+  useNotifications();
+  
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Index />} />
+          <Route path="/poems" element={<BrowsePoems />} />
+          <Route path="/poems/:id" element={<PoemDetail />} />
+          <Route path="/contests" element={<Contests />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/submit-poem" element={<SubmitPoem />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          
+          <Route element={<AdminRoute />}>
+            <Route path="/create-contest" element={<CreateContest />} />
+          </Route>
+
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -26,27 +55,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route element={<Layout />}>
-              <Route path="/" element={<Index />} />
-              <Route path="/poems" element={<BrowsePoems />} />
-              <Route path="/poems/:id" element={<PoemDetail />} />
-              <Route path="/contests" element={<Contests />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/submit-poem" element={<SubmitPoem />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              
-              <Route element={<AdminRoute />}>
-                <Route path="/create-contest" element={<CreateContest />} />
-              </Route>
-
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
+        <AppContent />
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>

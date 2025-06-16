@@ -35,7 +35,7 @@ END;
 $$;
 
 -- Function to get the details for a single approved poem
-CREATE OR REPLACE FUNCTION public.get_public_poem_details(poem_id UUID)
+CREATE OR REPLACE FUNCTION public.get_public_poem_details(p_poem_id UUID)
 RETURNS TABLE (
     id UUID,
     title TEXT,
@@ -44,11 +44,16 @@ RETURNS TABLE (
     votes INT,
     submitted_at TIMESTAMPTZ,
     author_name TEXT,
-    author_avatar_url TEXT
+    author_avatar_url TEXT,
+    user_has_voted BOOLEAN,
+    user_id UUID
 )
 LANGUAGE plpgsql
 STABLE
 AS $$
+DECLARE
+  v_user_id UUID := auth.uid();
+  v_is_admin BOOLEAN := public.get_user_role(v_user_id) = 'admin';
 BEGIN
     RETURN QUERY
     SELECT
@@ -59,12 +64,18 @@ BEGIN
         p.votes,
         p.submitted_at,
         COALESCE(pr.full_name, pr.username) as author_name,
-        pr.avatar_url as author_avatar_url
+        pr.avatar_url as author_avatar_url,
+        EXISTS (
+            SELECT 1
+            FROM public.poem_votes pv
+            WHERE pv.poem_id = p.id AND pv.user_id = v_user_id
+        ) as user_has_voted,
+        p.user_id
     FROM
         public.poems p
     JOIN
         public.profiles pr ON p.user_id = pr.id
     WHERE
-        p.id = poem_id AND p.status = 'approved';
+        p.id = p_poem_id AND (p.status = 'approved' OR p.user_id = v_user_id OR v_is_admin);
 END;
 $$;

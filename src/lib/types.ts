@@ -14,6 +14,7 @@ export type PoemWithAuthor = {
 export type PoemDetailData = PoemWithAuthor & {
   submitted_at: string | null;
   user_has_voted: boolean;
+  user_id: string;
 };
 
 export type Contest = Tables<'contests'>;

@@ -14,6 +14,7 @@ import CommentSection from "@/components/CommentSection";
 import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
 import { motion, useAnimate } from "framer-motion";
+import FollowButton from "@/components/FollowButton";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -141,15 +142,18 @@ const PoemDetail = () => {
         <CardHeader className="bg-gray-50 p-8">
           {category && <Badge variant="secondary" className="w-fit">{category}</Badge>}
           <h1 className="font-serif text-4xl md:text-5xl font-bold mt-4">{title}</h1>
-          <div className="flex items-center gap-4 mt-4">
-            <Avatar>
-              <AvatarImage src={author_avatar_url || undefined} alt={author_name || 'Anonymous'} />
-              <AvatarFallback>{author_name?.charAt(0) || 'A'}</AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="font-semibold">{author_name || 'Anonymous'}</p>
-              {submitted_at && <p className="text-sm text-gray-500">Published on {new Date(submitted_at).toLocaleDateString()}</p>}
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center gap-4">
+              <Avatar>
+                <AvatarImage src={author_avatar_url || undefined} alt={author_name || 'Anonymous'} />
+                <AvatarFallback>{author_name?.charAt(0) || 'A'}</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-semibold">{author_name || 'Anonymous'}</p>
+                {submitted_at && <p className="text-sm text-gray-500">Published on {new Date(submitted_at).toLocaleDateString()}</p>}
+              </div>
             </div>
+            <FollowButton authorId={poem.user_id} authorName={author_name || 'Anonymous'} />
           </div>
         </CardHeader>
         <CardContent className="p-8">
