@@ -19,6 +19,7 @@ import {
   FormDescription,
 } from "@/components/ui/form";
 import { useEffect } from "react";
+import { Send } from "lucide-react";
 
 const SubmitPoem = () => {
   const { user, session, loading } = useAuth();
@@ -154,9 +155,16 @@ const SubmitPoem = () => {
             )}
           />
           
-          <Button type="submit" className="w-full bg-brand-indigo hover:bg-brand-indigo/90" disabled={isSubmitting}>
-            {isSubmitting ? "Publishing..." : "Publish Poem"}
-          </Button>
+          <div className="pt-4 border-t border-gray-200">
+            <Button 
+              type="submit" 
+              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2" 
+              disabled={isSubmitting}
+            >
+              <Send className="w-5 h-5" />
+              {isSubmitting ? "Publishing Your Poem..." : "Submit Your Poem"}
+            </Button>
+          </div>
         </form>
       </Form>
     </div>
